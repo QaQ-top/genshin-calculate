@@ -47,7 +47,7 @@ interface RoleAttribute extends BasicAttribute {
   q: MagGroupProps[]
 }
 
-enum ElementType {
+export enum ElementType {
   /** 火 */
   fire = 1,
   /** 水 */
@@ -190,8 +190,8 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     const eHarms = basicEHarms.map((i) => this.getHarms(i, monster))
     const basicQHarms = this.getBasicHarm('q')
     const qHarms = basicQHarms.map((i) => this.getHarms(i, monster))
-    console.log(eHarms, 'E')
-    console.log(qHarms, 'Q')
+    console.log(eHarms.map(i => ({ ...i, value: i.value.value })), 'E')
+    console.log(qHarms.map(i => ({ ...i, value: i.value.value })), 'Q')
   }
 
   getHarms(basicHarm: Harm, monster: Monster): Omit<Harm, 'extra'> {
