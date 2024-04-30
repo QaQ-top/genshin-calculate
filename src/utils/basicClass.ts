@@ -20,6 +20,10 @@ interface ActualAttribute {
   ProficientElements: number
   /** 元素伤害 */
   ElementalDamage: number
+  /** 元素充能 */
+  ElementsToRecharge: number;
+  /** 暴击几率 */
+  CriticalStrikeChance: number
   /** 暴击伤害 */
   CriticalDamage: number
   /** 减防百分比 */
@@ -91,6 +95,8 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
   DefensiveForce
   ProficientElements
   ElementalDamage
+  ElementsToRecharge
+  CriticalStrikeChance
   CriticalDamage
   DefenseReduction
   DefenseIgnore
@@ -109,6 +115,8 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     this.DefensiveForce = ref(params.DefensiveForce)
     this.ProficientElements = ref(params.ProficientElements)
     this.ElementalDamage = ref(params.ElementalDamage)
+    this.ElementsToRecharge = ref(params.ElementsToRecharge)
+    this.CriticalStrikeChance = ref(params.CriticalStrikeChance)
     this.CriticalDamage = ref(params.CriticalDamage)
     this.DefenseReduction = ref(params.DefenseReduction)
     this.DefenseIgnore = ref(params.DefenseIgnore)
@@ -125,13 +133,16 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
       .map((mag) => {
         const values: ComputedRef<number>[] = []
         const object: Record<string, ComputedRef<number>> = {}
-        mag.value.map((i) => {
-          for (const _key in i) {
+        mag.value.map((ratio) => {
+          const item = ratio.value
+          for (const _key in item) {
             const key = _key as keyof Role['actual']
-            if (Object.prototype.hasOwnProperty.call(i, key)) {
+            if (Object.prototype.hasOwnProperty.call(item, key)) {
               object[key] = computed(() => {
                 // 基础伤害 ((攻击力 or 生命值 or 防御力 or 精通 or ...) * 倍率)
-                return (target[key] as Ref<number>).value * this.percentageToDecimal(Number(i[key]))
+                const basisValue =
+                  (target[key] as Ref<number>).value * this.percentageToDecimal(Number(item[key]))
+                return ratio.max ? Math.min(basisValue, ratio.max) : basisValue
               })
               values.push(object[key])
             }
@@ -272,6 +283,8 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     const DefensiveForces = this.getSame('DefensiveForce')
     const ProficientElements = this.getSame('ProficientElements')
     const ElementalDamages = this.getSame('ElementalDamage')
+    const ElementsToRecharge = this.getSame('ElementsToRecharge')
+    const CriticalStrikeChance = this.getSame('CriticalStrikeChance')
     const CriticalDamages = this.getSame('CriticalDamage')
     const DefenseReductions = this.getSame('DefenseReduction')
     const DefenseIgnores = this.getSame('DefenseIgnore')
@@ -308,6 +321,20 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
         () =>
           this.ElementalDamage.value +
           ElementalDamages.reduce((pre, i) => {
+            return pre + i.generatesAdditionValue(this)
+          }, 0)
+      ),
+      ElementsToRecharge: computed(
+        () =>
+          this.ElementsToRecharge.value +
+          ElementsToRecharge.reduce((pre, i) => {
+            return pre + i.generatesAdditionValue(this)
+          }, 0)
+      ),
+      CriticalStrikeChance: computed(
+        () =>
+          this.CriticalStrikeChance.value +
+          CriticalStrikeChance.reduce((pre, i) => {
             return pre + i.generatesAdditionValue(this)
           }, 0)
       ),
@@ -393,20 +420,38 @@ interface MagGroupProps {
   elementType: ElementType
   targetElementType?: ElementType
   /** 倍率组 */
-  value: EditableAttr[]
+  ratio: RatioGroupParams[]
+}
+
+interface RatioInfo {
+  describe?: string
+  max?: number
+}
+
+export interface RatioGroupParams extends RatioInfo {
+  value: EditableAttr
+}
+
+interface RatioGroup extends RatioInfo {
+  value: SpecifiedValue<EditableAttr, Ref<number | undefined>>
 }
 
 /** 倍率组 */
 export class MagnificationGroup {
   name: string
-  value: SpecifiedValue<EditableAttr, Ref<number | undefined>>[]
+  value: RatioGroup[]
   elementType: ElementType
   targetElementType?: ElementType
   constructor(params: MagGroupProps) {
     this.name = params.name
     this.elementType = params.elementType
     this.targetElementType = params.targetElementType
-    this.value = params.value.map((i) => toRefs(i))
+    this.value = params.ratio.map((i) => {
+      return {
+        ...i,
+        value: toRefs(i.value)
+      }
+    })
     return reactive(this) as any
   }
 }
