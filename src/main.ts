@@ -6,16 +6,25 @@ import { Attribute, ElementType, Role, type RatioGroupParams } from './utils/bas
 
 createApp(App).mount('#app')
 
-function getC2Ratio(): RatioGroupParams[] {
-  return [
-    {
-      describe: '满层2命',
-      max: 2700,
-      value: {
-        AttackingForce: 90
-      }
-    }
+function getC2Ratio(notGeneralAttack?: boolean) {
+  const ratios: RatioGroupParams[] = [
+    // {
+    //   describe: '满层2命',
+    //   max: 2700,
+    //   value: {
+    //     AttackingForce: 90
+    //   }
+    // }
   ]
+  if (!notGeneralAttack) {
+    // ratios.push({
+    //   describe: '余响',
+    //   value: {
+    //     AttackingForce: 35
+    //   }
+    // })
+  }
+  return ratios
 }
 
 function getClorindeHolyRelic() {
@@ -313,7 +322,7 @@ const clorindeRole = new Role(
               AttackingForce: 269.6
             }
           },
-          ...getC2Ratio()
+          ...getC2Ratio(true)
         ],
         elementType: 4,
         targetElementType: 1
@@ -363,11 +372,65 @@ const clorindeRole = new Role(
       description: '圣遗物特效',
       target: 'ElementalDamage',
       value: 54
-    })
+    }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '万叶增伤',
+    //   target: 'ElementalDamage',
+    //   value: 40
+    // }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '万叶c2',
+    //   target: 'ProficientElements',
+    //   value: 200
+    // }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '精1苍古',
+    //   target: 'ElementalDamage',
+    //   value: 16
+    // }),
+    // new Attribute({
+    //   type: '*',
+    //   description: '精1苍古',
+    //   target: 'AttackingForce',
+    //   value: 20
+    // }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '草神天赋',
+    //   target: 'ProficientElements',
+    //   value: 200
+    // }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '草神c2',
+    //   target: 'DefenseReduction',
+    //   value: 30
+    // })
+    // new Attribute({
+    //   type: '+',
+    //   description: '水神Q',
+    //   target: 'ElementalDamage',
+    //   value: 100
+    // }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '班尼特Q',
+    //   target: 'AttackingForce',
+    //   value: 1200
+    // }),
+    // new Attribute({
+    //   type: '*',
+    //   description: '班尼特Q·宗室套',
+    //   target: 'AttackingForce',
+    //   value: 20
+    // })
   ]
 )
 
-console.log(clorindeRole, clorindeRole.getCauseHarms({ level: 91, take: 10 }))
+console.log(clorindeRole, clorindeRole.getCauseHarms({ level: 91, take: 10 - 40 }))
 
 function getWavesFlash(): RatioGroupParams[] {
   return [
@@ -556,7 +619,6 @@ function getAyatoHolyRelic() {
     ]
   ].flat(Infinity) as Attribute[]
 }
-
 
 const ayatoRole = new Role(
   {

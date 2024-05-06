@@ -190,8 +190,9 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     const eHarms = basicEHarms.map((i) => this.getHarms(i, monster))
     const basicQHarms = this.getBasicHarm('q')
     const qHarms = basicQHarms.map((i) => this.getHarms(i, monster))
-    console.log(eHarms.map(i => ({ ...i, value: i.value.value })), 'E')
-    console.log(qHarms.map(i => ({ ...i, value: i.value.value })), 'Q')
+    console.log(eHarms, qHarms)
+    console.log(eHarms.map(i => ({ ...i, value: i.value.value })).map(i => `${i.name}: ${i.value}`).join('\r\n'))
+    console.log(qHarms.map(i => ({ ...i, value: i.value.value })).map(i => `${i.name}: ${i.value}`).join('\r\n'))
   }
 
   getHarms(basicHarm: Harm, monster: Monster): Omit<Harm, 'extra'> {
