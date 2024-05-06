@@ -2,28 +2,27 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import { Attribute, ElementType, Role, type RatioGroupParams } from './utils/basicClass'
+import {
+  Attribute,
+  AttributeActual,
+  DamageTypes,
+  ElementTypes,
+  Role,
+  type RatioGroupParams
+} from './utils/basicClass'
 
 createApp(App).mount('#app')
 
-function getC2Ratio(notGeneralAttack?: boolean) {
+function getC2Ratio() {
   const ratios: RatioGroupParams[] = [
-    // {
-    //   describe: '满层2命',
-    //   max: 2700,
-    //   value: {
-    //     AttackingForce: 90
-    //   }
-    // }
+    {
+      describe: '满层2命',
+      max: 2700,
+      value: {
+        AttackingForce: 90
+      }
+    }
   ]
-  if (!notGeneralAttack) {
-    // ratios.push({
-    //   describe: '余响',
-    //   value: {
-    //     AttackingForce: 35
-    //   }
-    // })
-  }
   return ratios
 }
 
@@ -215,6 +214,7 @@ const clorindeRole = new Role(
     e: [
       {
         name: '驰猎·满契',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '驰猎·满契',
@@ -224,11 +224,25 @@ const clorindeRole = new Role(
           },
           ...getC2Ratio()
         ],
-        elementType: 4,
-        targetElementType: 1
+        elementType: 4
       },
       {
         name: '驰猎·>100%契',
+        type: DamageTypes.Normal,
+        ratio: [
+          {
+            describe: '驰猎·>100%契',
+            value: {
+              AttackingForce: 92.9
+            }
+          },
+          ...getC2Ratio()
+        ],
+        elementType: 4
+      },
+      {
+        name: '驰猎·>100%契(激化)',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '驰猎·>100%契',
@@ -239,10 +253,11 @@ const clorindeRole = new Role(
           ...getC2Ratio()
         ],
         elementType: 4,
-        targetElementType: 1
+        targetElementType: 6
       },
       {
         name: '贯夜·空契',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '贯夜·空契',
@@ -252,11 +267,25 @@ const clorindeRole = new Role(
           },
           ...getC2Ratio()
         ],
-        elementType: 4,
-        targetElementType: 1
+        elementType: 4
       },
       {
         name: '贯夜·100%>契>0%',
+        type: DamageTypes.Normal,
+        ratio: [
+          {
+            describe: '贯夜·100%>契>0%',
+            value: {
+              AttackingForce: 105.3
+            }
+          },
+          ...getC2Ratio()
+        ],
+        elementType: 4
+      },
+      {
+        name: '贯夜·100%>契>0%(激化)',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '贯夜·100%>契>0%',
@@ -267,10 +296,11 @@ const clorindeRole = new Role(
           ...getC2Ratio()
         ],
         elementType: 4,
-        targetElementType: 1
+        targetElementType: 6
       },
       {
         name: '贯夜·契>100%',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '贯夜·契>100%',
@@ -280,11 +310,25 @@ const clorindeRole = new Role(
           },
           ...getC2Ratio()
         ],
-        elementType: 4,
-        targetElementType: 1
+        elementType: 4
       },
       {
         name: 'c1·夜巡之影',
+        type: DamageTypes.Normal,
+        ratio: [
+          {
+            describe: 'c1·夜巡之影',
+            value: {
+              AttackingForce: 30
+            }
+          },
+          ...getC2Ratio()
+        ],
+        elementType: 4
+      },
+      {
+        name: 'c1·夜巡之影(激化)',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: 'c1·夜巡之影',
@@ -295,10 +339,25 @@ const clorindeRole = new Role(
           ...getC2Ratio()
         ],
         elementType: 4,
-        targetElementType: 1
+        targetElementType: 6
       },
       {
         name: 'c6·明烛之影',
+        type: DamageTypes.Normal,
+        ratio: [
+          {
+            describe: 'c6·明烛之影',
+            value: {
+              AttackingForce: 200
+            }
+          },
+          ...getC2Ratio()
+        ],
+        elementType: 4
+      },
+      {
+        name: 'c6·明烛之影(激化)',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: 'c6·明烛之影',
@@ -309,12 +368,13 @@ const clorindeRole = new Role(
           ...getC2Ratio()
         ],
         elementType: 4,
-        targetElementType: 1
+        targetElementType: 6
       }
     ],
     q: [
       {
         name: '残光将终',
+        type: DamageTypes.OutbreakSkills,
         ratio: [
           {
             describe: '残光将终',
@@ -322,10 +382,25 @@ const clorindeRole = new Role(
               AttackingForce: 269.6
             }
           },
-          ...getC2Ratio(true)
+          ...getC2Ratio()
         ],
         elementType: 4,
         targetElementType: 1
+      },
+      {
+        name: '残光将终(激化)',
+        type: DamageTypes.OutbreakSkills,
+        ratio: [
+          {
+            describe: '残光将终',
+            value: {
+              AttackingForce: 269.6
+            }
+          },
+          ...getC2Ratio()
+        ],
+        elementType: 4,
+        targetElementType: 6
       }
     ]
   },
@@ -335,7 +410,8 @@ const clorindeRole = new Role(
       type: '+',
       description: 'c6·增益',
       target: 'CriticalDamage',
-      value: 70
+      value: 70,
+      damageTypes: [DamageTypes.Normal]
     }),
     new Attribute({
       type: '+',
@@ -367,48 +443,57 @@ const clorindeRole = new Role(
       target: 'ElementalDamage',
       value: 16 * 3
     }),
+    // new Attribute({
+    //   type: '+',
+    //   description: '契套·圣遗物特效',
+    //   target: 'ElementalDamage',
+    //   value: 54
+    // }),
+    new AttributeActual({
+      type: '*',
+      description: '余响·圣遗物特效',
+      target: 'AttackingForce',
+      value: 35,
+      isBasedInterval: true,
+      damageTypes: [DamageTypes.Normal]
+    }),
     new Attribute({
       type: '+',
-      description: '圣遗物特效',
+      description: '万叶增伤',
       target: 'ElementalDamage',
-      value: 54
+      value: 40
     }),
-    // new Attribute({
-    //   type: '+',
-    //   description: '万叶增伤',
-    //   target: 'ElementalDamage',
-    //   value: 40
-    // }),
-    // new Attribute({
-    //   type: '+',
-    //   description: '万叶c2',
-    //   target: 'ProficientElements',
-    //   value: 200
-    // }),
-    // new Attribute({
-    //   type: '+',
-    //   description: '精1苍古',
-    //   target: 'ElementalDamage',
-    //   value: 16
-    // }),
-    // new Attribute({
-    //   type: '*',
-    //   description: '精1苍古',
-    //   target: 'AttackingForce',
-    //   value: 20
-    // }),
-    // new Attribute({
-    //   type: '+',
-    //   description: '草神天赋',
-    //   target: 'ProficientElements',
-    //   value: 200
-    // }),
-    // new Attribute({
-    //   type: '+',
-    //   description: '草神c2',
-    //   target: 'DefenseReduction',
-    //   value: 30
-    // })
+    new Attribute({
+      type: '+',
+      description: '万叶c2',
+      target: 'ProficientElements',
+      value: 200
+    }),
+    new Attribute({
+      type: '+',
+      description: '精1苍古增伤',
+      target: 'ElementalDamage',
+      value: 16,
+      damageTypes: [DamageTypes.Normal, DamageTypes.Heavy]
+    }),
+    new Attribute({
+      type: '*',
+      description: '精1苍古加攻击力',
+      target: 'AttackingForce',
+      value: 20
+    }),
+    new Attribute({
+      type: '+',
+      description: '草神天赋',
+      target: 'ProficientElements',
+      value: 200
+    }),
+    new Attribute({
+      type: '+',
+      description: '草神c2',
+      target: 'DefenseReduction',
+      value: 30
+    })
     // new Attribute({
     //   type: '+',
     //   description: '水神Q',
@@ -438,12 +523,6 @@ function getWavesFlash(): RatioGroupParams[] {
       describe: '满层2命浪闪',
       value: {
         HealthPoint: 1.34 * 5
-      }
-    },
-    {
-      describe: '余响',
-      value: {
-        AttackingForce: 35
       }
     }
   ]
@@ -637,6 +716,7 @@ const ayatoRole = new Role(
     e: [
       {
         name: '瞬水剑·1',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '瞬水剑·1',
@@ -646,11 +726,12 @@ const ayatoRole = new Role(
           },
           ...getWavesFlash()
         ],
-        elementType: ElementType.water,
-        targetElementType: ElementType.physical
+        elementType: ElementTypes.water,
+        targetElementType: ElementTypes.physical
       },
       {
         name: '瞬水剑·2',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '瞬水剑·2',
@@ -660,11 +741,12 @@ const ayatoRole = new Role(
           },
           ...getWavesFlash()
         ],
-        elementType: ElementType.water,
-        targetElementType: ElementType.physical
+        elementType: ElementTypes.water,
+        targetElementType: ElementTypes.physical
       },
       {
         name: '瞬水剑·3',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '瞬水剑·3',
@@ -674,11 +756,12 @@ const ayatoRole = new Role(
           },
           ...getWavesFlash()
         ],
-        elementType: ElementType.water,
-        targetElementType: ElementType.physical
+        elementType: ElementTypes.water,
+        targetElementType: ElementTypes.physical
       },
       {
         name: '水影',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: '水影',
@@ -687,27 +770,22 @@ const ayatoRole = new Role(
             }
           }
         ],
-        elementType: ElementType.water,
-        targetElementType: ElementType.physical
+        elementType: ElementTypes.water,
+        targetElementType: ElementTypes.physical
       },
       {
         name: 'c6·瞬水剑',
+        type: DamageTypes.Normal,
         ratio: [
           {
             describe: 'c6·瞬水剑',
             value: {
               AttackingForce: 450
             }
-          },
-          {
-            describe: '余响',
-            value: {
-              AttackingForce: 70
-            }
           }
         ],
-        elementType: ElementType.water,
-        targetElementType: ElementType.physical
+        elementType: ElementTypes.water,
+        targetElementType: ElementTypes.physical
       }
     ],
     q: []
@@ -742,13 +820,23 @@ const ayatoRole = new Role(
       type: '+',
       description: '武器精1特效',
       target: 'ElementalDamage',
-      value: 20 * 2
+      value: 20 * 2,
+      damageTypes: [DamageTypes.Normal]
     }),
     new Attribute({
       type: '+',
       description: 'Q普攻伤害提升',
       target: 'ElementalDamage',
-      value: 20
+      value: 20,
+      damageTypes: [DamageTypes.Normal]
+    }),
+    new AttributeActual({
+      type: '*',
+      description: '余响·圣遗物特效',
+      target: 'AttackingForce',
+      value: 35,
+      isBasedInterval: true,
+      damageTypes: [DamageTypes.Normal]
     })
   ]
 )

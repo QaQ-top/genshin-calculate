@@ -21,7 +21,7 @@ interface ActualAttribute {
   /** 元素伤害 */
   ElementalDamage: number
   /** 元素充能 */
-  ElementsToRecharge: number;
+  ElementsToRecharge: number
   /** 暴击几率 */
   CriticalStrikeChance: number
   /** 暴击伤害 */
@@ -47,7 +47,7 @@ interface RoleAttribute extends BasicAttribute {
   q: MagGroupProps[]
 }
 
-export enum ElementType {
+export enum ElementTypes {
   /** 火 */
   fire = 1,
   /** 水 */
@@ -66,13 +66,34 @@ export enum ElementType {
   physical
 }
 
-interface Harm {
-  /** 伤害名称 */
+/** 伤害类型 */
+export enum DamageTypes {
+  Null = 'Null',
+  /** 普攻 */
+  Normal = 'Normal',
+  /** 重击 */
+  Heavy = 'Blow',
+  /** 下落 */
+  Fall = 'Fall',
+  /** 元素战技 */
+  CombatSkills = 'CombatSkills',
+  /** 元素爆发 */
+  OutbreakSkills = 'OutbreakSkills'
+}
+
+interface Attack {
+  /** 攻击每次 */
   name: string
-  /** 伤害值 */
-  value: ComputedRef<number>
-  type: ElementType
-  targetType?: ElementType
+  /** 伤害类型 */
+  type: DamageTypes
+  /** 元素类型  (1: 火 | 2: 水 | 3: 冰 | 4: 雷 | 5: 风 | 6: 草 | 7: 岩 | 8: 物理) */
+  elementType: ElementTypes
+  /** 攻击目标元素类型  (1: 火 | 2: 水 | 3: 冰 | 4: 雷 | 5: 风 | 6: 草 | 7: 岩 | 8: 物理) */
+  targetElementType?: ElementTypes
+}
+
+interface Harm extends Attack {
+  value: ComputedRef
   object?: Record<string, ComputedRef<number>>
   extra: {
     [key: string]: any
@@ -123,7 +144,7 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     this.e = params.e.map((i) => new MagnificationGroup(i))
     this.q = params.q.map((i) => new MagnificationGroup(i))
     this.extras = extras || []
-    this.initActual()
+    this.actual = this.generateActual();
   }
 
   /** 获取基础值 */
@@ -150,10 +171,10 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
         })
         /** 超激化 */
         const SuperIntensified =
-          mag.elementType == ElementType.thunder && mag.targetElementType == ElementType.grass
+          mag.elementType == ElementTypes.thunder && mag.targetElementType == ElementTypes.grass
         /** 蔓激化 */
         const tendrilIntensified =
-          mag.elementType == ElementType.grass && mag.targetElementType == ElementType.thunder
+          mag.elementType == ElementTypes.grass && mag.targetElementType == ElementTypes.thunder
         if (SuperIntensified || tendrilIntensified) {
           // 加入激化反应
           const intensified = computed(() => {
@@ -171,10 +192,18 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
           values.push(intensified)
           object.intensified = intensified
         }
+        const extraBased = this.extras.filter(
+          (i) => i.isBasedInterval && i.damageTypes.includes(mag.type)
+        )
+        if (extraBased.length) {
+          // 额外基础倍率区
+          values.push(...extraBased.map((i) => computed(() => i.generatesAdditionValue(this))))
+        }
         return {
           name: mag.name,
-          type: mag.elementType,
-          targetType: mag.targetElementType,
+          type: mag.type,
+          elementType: mag.elementType,
+          targetElementType: mag.targetElementType,
           value: computed(() => values.reduce((p, i) => p + i.value, 0)),
           object,
           extra: {
@@ -191,8 +220,18 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     const basicQHarms = this.getBasicHarm('q')
     const qHarms = basicQHarms.map((i) => this.getHarms(i, monster))
     console.log(eHarms, qHarms)
-    console.log(eHarms.map(i => ({ ...i, value: i.value.value })).map(i => `${i.name}: ${i.value}`).join('\r\n'))
-    console.log(qHarms.map(i => ({ ...i, value: i.value.value })).map(i => `${i.name}: ${i.value}`).join('\r\n'))
+    console.log(
+      eHarms
+        .map((i) => ({ ...i, value: i.value.value }))
+        .map((i) => `${i.name}: ${i.value}`)
+        .join('\r\n')
+    )
+    console.log(
+      qHarms
+        .map((i) => ({ ...i, value: i.value.value }))
+        .map((i) => `${i.name}: ${i.value}`)
+        .join('\r\n')
+    )
   }
 
   getHarms(basicHarm: Harm, monster: Monster): Omit<Harm, 'extra'> {
@@ -215,17 +254,18 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     // });
     // 理论伤害 =  基础伤害 * (1 + 元素伤害 + 增伤) * (1 + 暴击伤害) * (反应倍率 * (1 + 精通增伤))
     // 实际伤害 = 理论伤害 * 怪物承伤百分比 * 等级差(防御区间)
+    const skillsActual = this.generateActual(basicHarm.type)
     const value = computed(() => {
       /** 理论伤害 */
       const theory =
         // 基础伤害
         basicHarm.value.value *
         // 增伤区
-        (1 + this.percentageToDecimal(this.actual.ElementalDamage.value)) *
+        (1 + this.percentageToDecimal(skillsActual.ElementalDamage.value)) *
         // 暴伤区
-        (1 + this.percentageToDecimal(this.actual.CriticalDamage.value)) *
+        (1 + this.percentageToDecimal(skillsActual.CriticalDamage.value)) *
         // 振幅反应
-        this.getReactiveIncreaseInjury(basicHarm)
+        this.getReactiveIncreaseInjury(basicHarm, skillsActual)
       /** 实际伤害 */
       const actual =
         // 理论伤害
@@ -234,8 +274,8 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
         this.getTakeDamage(monster.take)! *
         // 防御区
         this.defense({
-          ignore: this.actual.DefenseIgnore.value,
-          subtract: this.actual.DefenseReduction.value,
+          ignore: skillsActual.DefenseIgnore.value,
+          subtract: skillsActual.DefenseReduction.value,
           monsterLevel: monster.level
         })
       return actual
@@ -244,6 +284,7 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
       ...basicHarm.extra,
       name: basicHarm.name,
       type: basicHarm.type,
+      elementType: basicHarm.elementType,
       object: basicHarm.object,
       value
     }
@@ -253,43 +294,64 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     return val / 100
   }
 
-  private getReactiveIncreaseInjury(basicHarm: Harm) {
+  private getReactiveIncreaseInjury(basicHarm: Harm, skillsActual?: ToComputed<ActualAttribute>) {
+    skillsActual = skillsActual || this.actual
     /** (2.78 x 精通) ÷ (精通 + 1400) */
     const masterProfit =
-      (2.78 * this.actual.ProficientElements.value) / (1400 + this.actual.ProficientElements.value)
+      (2.78 * skillsActual.ProficientElements.value) /
+      (1400 + skillsActual.ProficientElements.value)
     let reactiveProfit = 1
-    if (basicHarm.type == ElementType.fire && basicHarm.targetType == ElementType.water) {
+    if (
+      basicHarm.elementType == ElementTypes.fire &&
+      basicHarm.targetElementType == ElementTypes.water
+    ) {
       reactiveProfit = 1.5
     }
-    if (basicHarm.type == ElementType.fire && basicHarm.targetType == ElementType.ice) {
+    if (
+      basicHarm.elementType == ElementTypes.fire &&
+      basicHarm.targetElementType == ElementTypes.ice
+    ) {
       reactiveProfit = 2
     }
-    if (basicHarm.type == ElementType.water && basicHarm.targetType == ElementType.fire) {
+    if (
+      basicHarm.elementType == ElementTypes.water &&
+      basicHarm.targetElementType == ElementTypes.fire
+    ) {
       reactiveProfit = 2
     }
-    if (basicHarm.type == ElementType.ice && basicHarm.targetType == ElementType.fire) {
+    if (
+      basicHarm.elementType == ElementTypes.ice &&
+      basicHarm.targetElementType == ElementTypes.fire
+    ) {
       reactiveProfit = 1.5
     }
     // (反应倍率 * (1 + 精通增伤)
-    return reactiveProfit * (1 + masterProfit)
+    return reactiveProfit == 1 ? reactiveProfit : reactiveProfit * (1 + masterProfit)
   }
 
-  private getSame(target: keyof BasicAttribute) {
-    return this.extras.filter((attr) => attr.target == target)
+  private getSame(target: keyof BasicAttribute, type?: DamageTypes) {
+    return this.extras.filter((attr) => {
+      const isTarget = attr.target == target && !attr.isBasedInterval
+      if (type) {
+        return isTarget && attr.damageTypes.includes(type)
+      } else {
+        return isTarget && attr.damageTypes == Attribute.AllDamageType
+      }
+    })
   }
 
-  private initActual() {
-    const hps = this.getSame('HealthPoint')
-    const AttackingForces = this.getSame('AttackingForce')
-    const DefensiveForces = this.getSame('DefensiveForce')
-    const ProficientElements = this.getSame('ProficientElements')
-    const ElementalDamages = this.getSame('ElementalDamage')
-    const ElementsToRecharge = this.getSame('ElementsToRecharge')
-    const CriticalStrikeChance = this.getSame('CriticalStrikeChance')
-    const CriticalDamages = this.getSame('CriticalDamage')
-    const DefenseReductions = this.getSame('DefenseReduction')
-    const DefenseIgnores = this.getSame('DefenseIgnore')
-    this.actual = {
+  private generateActual(type?: DamageTypes): ToComputed<ActualAttribute> {
+    const hps = this.getSame('HealthPoint', type)
+    const AttackingForces = this.getSame('AttackingForce', type)
+    const DefensiveForces = this.getSame('DefensiveForce', type)
+    const ProficientElements = this.getSame('ProficientElements', type)
+    const ElementalDamages = this.getSame('ElementalDamage', type)
+    const ElementsToRecharge = this.getSame('ElementsToRecharge', type)
+    const CriticalStrikeChance = this.getSame('CriticalStrikeChance', type)
+    const CriticalDamages = this.getSame('CriticalDamage', type)
+    const DefenseReductions = this.getSame('DefenseReduction', type)
+    const DefenseIgnores = this.getSame('DefenseIgnore', type)
+    return {
       HealthPoint: computed(
         () =>
           this.HealthPoint.value +
@@ -415,11 +477,7 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
 
 type EditableAttr = Partial<Record<keyof Role['actual'], number>>
 
-interface MagGroupProps {
-  name: string
-  /** (1: 火 | 2: 水 | 3: 冰 | 4: 雷 | 5: 风 | 6: 草 | 7: 岩 | 8: 物理) */
-  elementType: ElementType
-  targetElementType?: ElementType
+interface MagGroupProps extends Attack {
   /** 倍率组 */
   ratio: RatioGroupParams[]
 }
@@ -440,11 +498,13 @@ interface RatioGroup extends RatioInfo {
 /** 倍率组 */
 export class MagnificationGroup {
   name: string
+  type: DamageTypes
   value: RatioGroup[]
-  elementType: ElementType
-  targetElementType?: ElementType
+  elementType: ElementTypes
+  targetElementType?: ElementTypes
   constructor(params: MagGroupProps) {
     this.name = params.name
+    this.type = params.type
     this.elementType = params.elementType
     this.targetElementType = params.targetElementType
     this.value = params.ratio.map((i) => {
@@ -457,38 +517,57 @@ export class MagnificationGroup {
   }
 }
 
+interface AttributeParams {
+  type: Attribute['type']
+  target: Attribute['target']
+  value: number
+  damageTypes?: DamageTypes[]
+  description?: string
+  /** 是否是百分比 */
+  isPercentage?: boolean
+  /** 是否是基础区 */
+  isBasedInterval?: boolean
+}
+
 /** 额外属性 */
 export class Attribute {
+  static readonly AllDamageType = [
+    DamageTypes.Null,
+    DamageTypes.Normal,
+    DamageTypes.Heavy,
+    DamageTypes.Fall,
+    DamageTypes.CombatSkills,
+    DamageTypes.OutbreakSkills
+  ]
   type: '+' | '*'
   target: keyof Role['actual']
   value: Ref<number>
   description: string
+  isBasedInterval: boolean
   isPercentage: boolean
   /** 增加的值 */
   currentIncrease = 0
+  damageTypes = Attribute.AllDamageType
   constructor({
     type,
     target,
     value,
     description,
-    isPercentage = true
-  }: {
-    type: Attribute['type']
-    target: Attribute['target']
-    value: number
-    description?: string
-    /** 是否是百分比 */
-    isPercentage?: boolean
-  }) {
+    isPercentage = true,
+    isBasedInterval = false,
+    damageTypes
+  }: AttributeParams) {
     this.type = type
     this.value = ref(value)
     this.target = target
     this.description = description || ''
     this.isPercentage = isPercentage
+    this.damageTypes = damageTypes || Attribute.AllDamageType
+    this.isBasedInterval = isBasedInterval
   }
 
-  generatesAdditionValue(role: Role) {
-    const basicValue = role[this.target] as Ref<number>
+  protected getValue(role: Role, isActual = false) {
+    const basicValue = (isActual ? role.actual : role)[this.target] as Ref<number>
     let run = ''
     if (this.type == '*') {
       run = `return (${basicValue.value} ${this.type} ${this.isPercentage ? role.percentageToDecimal(this.value.value) : this.value.value})`
@@ -496,5 +575,18 @@ export class Attribute {
       run = `return ${this.value.value}`
     }
     return (this.currentIncrease = new Function(run)())
+  }
+
+  generatesAdditionValue(role: Role) {
+    return this.getValue(role)
+  }
+}
+
+export class AttributeActual extends Attribute {
+  constructor(params: AttributeParams) {
+    super(params)
+  }
+  generatesAdditionValue(role: Role) {
+    return super.getValue(role, true)
   }
 }
