@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import ElementTypesComponent from './components/ElementTypesComponent.vue'
+import BasisAttr from './components/BasisAttr.vue'
+import { ref } from 'vue'
+import type { ActualAttribute, ElementTypes } from './utils/basicClass'
+
+const select = ref<ElementTypes>()
 </script>
 
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
+    <ElementTypesComponent v-model="select" />
+    <BasisAttr />
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
     </div>
   </header>
-
   <main>
     <TheWelcome />
   </main>

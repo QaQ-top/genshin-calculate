@@ -9,7 +9,7 @@ type ToComputed<T> = SpecifiedValue<T, ComputedRef<number>>
 
 type ToRef<T> = SpecifiedValue<T, Ref<number>>
 
-interface ActualAttribute {
+export interface ActualAttribute {
   /** 生命值 */
   HealthPoint: number
   /** 攻击力 */
@@ -90,6 +90,7 @@ interface Attack {
   elementType: ElementTypes
   /** 攻击目标元素类型  (1: 火 | 2: 水 | 3: 冰 | 4: 雷 | 5: 风 | 6: 草 | 7: 岩 | 8: 物理) */
   targetElementType?: ElementTypes
+  [key: string]: any
 }
 
 interface Harm extends Attack {
@@ -222,13 +223,13 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
     console.log(eHarms, qHarms)
     console.log(
       eHarms
-        .map((i) => ({ ...i, value: i.value.value }))
+        .map((i) => ({ ...i, value: i.value.value } as Harm))
         .map((i) => `${i.name}: ${i.value}`)
         .join('\r\n')
     )
     console.log(
       qHarms
-        .map((i) => ({ ...i, value: i.value.value }))
+        .map((i) => ({ ...i, value: i.value.value } as Harm))
         .map((i) => `${i.name}: ${i.value}`)
         .join('\r\n')
     )
@@ -477,9 +478,11 @@ export class Role implements ToRef<Omit<BasicAttribute, 'name'>> {
 
 type EditableAttr = Partial<Record<keyof Role['actual'], number>>
 
-interface MagGroupProps extends Attack {
+export interface MagGroupProps extends Attack {
   /** 倍率组 */
   ratio: RatioGroupParams[]
+  /** 消耗时间 */
+  consumptionTime?: number
 }
 
 interface RatioInfo {
