@@ -1,13 +1,13 @@
 import { reactive, ref, computed, toRefs } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 
-type SpecifiedValue<T, V> = {
+export type SpecifiedValue<T, V> = {
   [P in keyof T]: V
 }
 
-type ToComputed<T> = SpecifiedValue<T, ComputedRef<number>>
+export type ToComputed<T> = SpecifiedValue<T, ComputedRef<number>>
 
-type ToRef<T> = SpecifiedValue<T, Ref<number>>
+export type ToRef<T> = SpecifiedValue<T, Ref<number>>
 
 export interface ActualAttribute {
   /** 生命值 */

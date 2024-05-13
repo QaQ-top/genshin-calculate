@@ -1,0 +1,14 @@
+{
+  "name": "名称",
+  "level": "等级",
+  "HealthPoint": "生命值",
+  "AttackingForce": "攻击力",
+  "DefensiveForce": "防御力",
+  "ProficientElements": "元素精通",
+  "ElementalDamage": "元素伤害",
+  "ElementsToRecharge": "元素充能",
+  "CriticalStrikeChance": "暴击几率",
+  "CriticalDamage": "暴击伤害",
+  "DefenseReduction": "减防百分比",
+  "DefenseIgnore": "无视防御力百分比"
+}

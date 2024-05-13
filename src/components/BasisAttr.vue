@@ -1,73 +1,71 @@
 <script lang="ts">
-import { defineComponent, reactive } from 'vue'
-import { NDescriptions, NDescriptionsItem, NInput } from 'naive-ui'
-import type { ActualAttribute } from '../utils/basicClass'
+import { defineComponent, reactive, ref, type Ref } from 'vue'
+import { NDescriptions, NDescriptionsItem, NInputNumber, type InputNumberProps } from 'naive-ui'
+import type { ActualAttribute, ToRef } from '../utils/basicClass'
 export default defineComponent({
   name: 'BasisAttr'
 })
 </script>
 <script setup lang="ts">
-const attr: { value: number; label: keyof ActualAttribute; name: string }[] = reactive([
+type Attr = { value: Ref<number>; label: keyof (ActualAttribute & { name: ''; level: 0 }) }
+const attr = reactive<(Attr & Omit<InputNumberProps, 'value'>)[]>([
   {
     label: 'HealthPoint',
-    name: '生命值',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'AttackingForce',
-    name: '攻击力',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'DefensiveForce',
-    name: '防御力',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'ProficientElements',
-    name: '元素精通',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'ElementalDamage',
-    name: '元素伤害',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'ElementsToRecharge',
-    name: '元素充能',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'CriticalStrikeChance',
-    name: '暴击几率',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'CriticalDamage',
-    name: '暴击伤害',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'DefenseReduction',
-    name: '减防百分比',
-    value: 0
+    value: ref(0)
   },
   {
     label: 'DefenseIgnore',
-    name: '无视防御力百分比',
-    value: 0
+    value: ref(0)
   }
 ])
+const getAttribute = () => {
+  return Object.fromEntries(
+    (attr as unknown as Attr[]).map((i) => [i.label, i.value])
+  ) as ToRef<ActualAttribute>
+}
 </script>
 <template>
   <NDescriptions label-placement="left" title="描述">
     <template v-for="item in attr" :key="item.label">
       <NDescriptionsItem>
         <template #label>
-          {{ item.name }}
+          {{ item.label }}
         </template>
-        <NInput v-model="item.value" />
+        <div>
+          <NInputNumber v-model="item.value" :min="item.min || 0" :max="item.max" />
+        </div>
       </NDescriptionsItem>
     </template>
   </NDescriptions>
