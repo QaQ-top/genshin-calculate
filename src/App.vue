@@ -3,8 +3,9 @@ import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 import ElementTypesComponent from './components/ElementTypesComponent.vue'
 import BasisAttr from './components/BasisAttr.vue'
+import RoleCustom from './components/role/custom.vue'
 import { ref } from 'vue'
-import type { ActualAttribute, ElementTypes } from './utils/basicClass'
+import type { ActualAttribute, ElementTypes } from '@/utils/basicClass'
 
 const select = ref<ElementTypes>()
 </script>
@@ -13,7 +14,9 @@ const select = ref<ElementTypes>()
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
     <ElementTypesComponent v-model="select" />
+    <RoleCustom />
     <BasisAttr />
+    {{ $t('name') }}
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
     </div>

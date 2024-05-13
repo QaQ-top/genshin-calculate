@@ -1,0 +1,14 @@
+{
+  "name": "name",
+  "level": "level",
+  "HealthPoint": "HealthPoint",
+  "AttackingForce": "AttackingForce",
+  "DefensiveForce": "DefensiveForce",
+  "ProficientElements": "ProficientElements",
+  "ElementalDamage": "ElementalDamage",
+  "ElementsToRecharge": "ElementsToRecharge",
+  "CriticalStrikeChance": "CriticalStrikeChance",
+  "CriticalDamage": "CriticalDamage",
+  "DefenseReduction": "DefenseReduction",
+  "DefenseIgnore": "DefenseIgnore"
+}
