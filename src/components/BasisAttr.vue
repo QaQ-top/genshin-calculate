@@ -1,12 +1,17 @@
 <script lang="ts">
-import { defineComponent, reactive, toRef } from 'vue'
+import { defineComponent, defineProps, reactive, toRef } from 'vue'
 import { NDescriptions, NDescriptionsItem, NInputNumber, type InputNumberProps } from 'naive-ui'
 import type { ActualAttribute, ToRef } from '@/utils/basicClass'
+import useAutoBindStorage from '@/hooks/useAutoBindStorage';
+interface Props {
+  roleId: string | number
+}
 export default defineComponent({
   name: 'BasisAttr'
 })
 </script>
 <script setup lang="ts">
+const props = defineProps<Props>()
 type Attr = { value: number; label: keyof (ActualAttribute & { name: ''; level: 0 }) }
 const attrConfig = reactive<(Attr & Omit<InputNumberProps, 'value'>)[]>([
   {
@@ -54,6 +59,11 @@ const attr = Object.fromEntries(
     (attrConfig as unknown as Attr[]).map((i) => [i.label, toRef(i, 'value')])
   ) as ToRef<ActualAttribute>
   console.log(attr)
+  useAutoBindStorage({
+    id: props.roleId,
+    key: 'basis-attr',
+    data: attr,
+  });
 </script>
 <template>
   <NDescriptions label-placement="left" title="角色属性">

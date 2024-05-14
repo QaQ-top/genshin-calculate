@@ -13,9 +13,8 @@ const select = ref<ElementTypes>()
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-    <ElementTypesComponent v-model="select" />
-    <RoleCustom />
-    <BasisAttr />
+    <RoleCustom role-id="111" />
+    <BasisAttr role-id="111" />
     {{ $t('name') }}
     <div class="wrapper">
       <HelloWorld msg="You did it!" />

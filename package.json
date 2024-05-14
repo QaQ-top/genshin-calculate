@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vueuse/core": "^10.9.0",
     "i18next": "^23.11.4",
     "i18next-vue": "^4.0.0",
     "vue": "^3.4.21"

@@ -1,6 +1,7 @@
 {
   "name": "名称",
   "level": "等级",
+  "elementType": "元素类型",
   "HealthPoint": "生命值",
   "AttackingForce": "攻击力",
   "DefensiveForce": "防御力",
@@ -10,5 +11,13 @@
   "CriticalStrikeChance": "暴击几率",
   "CriticalDamage": "暴击伤害",
   "DefenseReduction": "减防百分比",
-  "DefenseIgnore": "无视防御力百分比"
+  "DefenseIgnore": "无视防御力百分比",
+  "fire": "火",
+  "water": "水",
+  "ice": "冰",
+  "thunder": "雷",
+  "wind": "风",
+  "grass": "草",
+  "rock": "岩",
+  "physical": "物理"
 }

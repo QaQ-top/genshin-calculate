@@ -1,6 +1,7 @@
 {
   "name": "name",
   "level": "level",
+  "elementType": "elementType",
   "HealthPoint": "HealthPoint",
   "AttackingForce": "AttackingForce",
   "DefensiveForce": "DefensiveForce",
@@ -10,5 +11,13 @@
   "CriticalStrikeChance": "CriticalStrikeChance",
   "CriticalDamage": "CriticalDamage",
   "DefenseReduction": "DefenseReduction",
-  "DefenseIgnore": "DefenseIgnore"
+  "DefenseIgnore": "DefenseIgnore",
+  "fire": "fire",
+  "water": "water",
+  "ice": "ice",
+  "thunder": "thunder",
+  "wind": "wind",
+  "grass": "grass",
+  "rock": "rock",
+  "physical": "physical"
 }
